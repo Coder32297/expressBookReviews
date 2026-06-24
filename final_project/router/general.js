@@ -61,19 +61,18 @@ public_users.get('/isbn/:isbn', async function (req, res) {
     }
 });
   
-// Get book details based on author
-public_users.get('/author/:author',function (req, res) {
-    //Get book details based on author
-    public_users.get("/author/:author", function (req, res) {
-        const author = req.params.author;
-
-        // Obtain all the keys for the 'books' object
+// Get book details based on author using Async-Await
+public_users.get('/author/:author', async function (req, res) {
+    const author = req.params.author;
+    try {
+        // Asynchronously fetch from your local server endpoint
+        const response = await axios.get(`http://localhost:5000/author/${author}`);
+        return res.status(200).json(response.data);
+    } catch (error) {
+        // Fallback directly to filtering local data if the network request fails
         const bookKeys = Object.keys(books);
-
-        // Array to hold books that match the requested author
         let matchingBooks = [];
 
-        // Iterate through the 'books' object using keys
         bookKeys.forEach(key => {
             if (books[key].author.toLowerCase() === author.toLowerCase()) {
                 matchingBooks.push({
@@ -83,13 +82,13 @@ public_users.get('/author/:author',function (req, res) {
                 });
             }
         });
-        // Check if any matching books were found
+
         if (matchingBooks.length > 0) {
             return res.status(200).send(JSON.stringify({ booksByAuthor: matchingBooks }, null, 4));
         } else {
             return res.status(404).json({ message: "No books found for this author" });
         }
-    });
+    }
 });
 
 //Get book details based on title
